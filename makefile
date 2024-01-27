@@ -1,5 +1,5 @@
-PYTHON_VER			:= 3.11.5
-VENV				:= $(PYTHON_VER)-template
+PYTHON_VER			:= 3.11.7
+VENV				:= $(PYTHON_VER)-groupbychunkreader
 
 test_all:
 	@if [ -e htmlcov ]; then\
