@@ -24,22 +24,14 @@ class GroupByChunkReader:
 
     def __next__(self):
         if self.source_closed:
-            if len(self.df_pool) > 0:
-                return self.df_pool.pop(sorted(list(self.df_pool))[0])
-            else:
-                raise StopIteration
-                # end if
+            raise StopIteration
         else:
             while not self.source_closed and len(self.df_pool) <= 1:
                 try:
                     this_df = next(self.source_df)
                 except StopIteration:
                     this_df = pd.DataFrame([], columns=[self.group_by])
-                    if self.source_closed:
-                        raise
-                    else:
-                        self.source_closed = True
-                        # end if
+                    self.source_closed = True
                     # end try
 
                 for split_key in list(this_df[self.group_by].unique()):

@@ -24,15 +24,12 @@ type_def = {'value': int, 'key': 'object'}
 
 
 @pytest.fixture(scope='session', autouse=True)
-def setup_and_teardown(tempdir: Path, logger: Logger):
+def setup_and_teardown():
     # setup
-
-    logger.info(tempdir)
 
     yield
 
     # teardown
-    shutil.rmtree(tempdir, ignore_errors=True)
     # end def
 
 
@@ -55,9 +52,7 @@ def tempdir() -> Generator[Path, None, None]:
 
     tempdir = Path(tempfile.mkdtemp())
     yield tempdir
-    if tempdir.exists():
-        shutil.rmtree(tempdir)
-        # end if
+    shutil.rmtree(tempdir, ignore_errors=True)
     # end def
 
 
@@ -451,6 +446,31 @@ def test_key3_patterns(tempdir: Path, logger: Logger):
     my_reader = GroupByChunkReader(test_csv_06_df, 'key')
     count = 0
     expected = {1: chunksize - 2, 2: chunksize, 3: chunksize * 10 + 1}
+    for this_df in my_reader:
+        count += 1
+        assert len(this_df) == expected[count]
+        # end for
+
+    assert count == 3
+    with pytest.raises(StopIteration):
+        next(my_reader)
+        # end with
+
+    # key1 chunk<1, key2 chunk<1, key3 chunk<1
+    test_csv_07_df = pd.DataFrame([[x, '01'] for x in range(chunksize - 2)] +
+                                  [[x, '02'] for x in range(chunksize - 2)] +
+                                  [[x, '03'] for x in range(chunksize - 2)],
+                                  columns=list(type_def))
+    test_csv_07_df.to_csv(tempdir.joinpath(test_csv_format.format(27)))
+
+    test_csv_07_df = pd.read_csv(
+        tempdir.joinpath(
+            test_csv_format.format(27)),
+        dtype=type_def, chunksize=10)
+
+    my_reader = GroupByChunkReader(test_csv_07_df, 'key')
+    count = 0
+    expected = {1: chunksize - 2, 2: chunksize - 2, 3: chunksize - 2}
     for this_df in my_reader:
         count += 1
         assert len(this_df) == expected[count]
