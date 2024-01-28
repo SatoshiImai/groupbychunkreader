@@ -14,7 +14,6 @@ class GroupByChunkReader:
         self.source_df = source_df
         self.source_closed = False
         self.group_by = group_by
-        self.previous = None
         self.df_pool = {}
         # end def
 
