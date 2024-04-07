@@ -2,7 +2,7 @@
 # ---------------------------------------------------------------------------
 # __author__ = 'Satoshi Imai'
 # __credits__ = ['Satoshi Imai']
-# __version__ = "0.9.0"
+# __version__ = "0.9.1"
 # ---------------------------------------------------------------------------
 
 import logging
@@ -497,11 +497,11 @@ def test_random_patterns(tempdir: Path, logger: Logger):
             [[x, f'{key:0>3}'] for x in range(record_size)]
         # end for
 
-    # key1 chunk<1
+    # generate
     test_csv_01_df = pd.DataFrame(source_record, columns=list(type_def))
     test_csv_01_df.to_csv(tempdir.joinpath(test_csv_format.format(31)))
 
-    # key1 chunk<1
+    # load
     test_csv_01_df = pd.read_csv(
         tempdir.joinpath(
             test_csv_format.format(31)),
@@ -515,6 +515,37 @@ def test_random_patterns(tempdir: Path, logger: Logger):
         # end for
 
     assert count == key_size
+    with pytest.raises(StopIteration):
+        next(my_reader)
+        # end with
+    # end def
+
+
+@pytest.mark.run(order=50)
+def test_empty_df(tempdir: Path, logger: Logger):
+    logger.info('empty_df')
+
+    key_size = random.randint(1, 100)
+    source_record = []
+
+    # generate
+    test_csv_01_df = pd.DataFrame(source_record, columns=list(type_def))
+    test_csv_01_df.to_csv(tempdir.joinpath(test_csv_format.format(32)))
+
+    # load
+    test_csv_01_df = pd.read_csv(
+        tempdir.joinpath(
+            test_csv_format.format(32)),
+        dtype=type_def, chunksize=chunksize)
+
+    my_reader = GroupByChunkReader(test_csv_01_df, 'key')
+    count = 0
+    for this_df in my_reader:
+        count += 1
+        assert len(this_df) == 0
+        # end for
+
+    assert count == 1
     with pytest.raises(StopIteration):
         next(my_reader)
         # end with

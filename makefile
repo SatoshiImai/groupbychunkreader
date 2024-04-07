@@ -1,4 +1,4 @@
-PYTHON_VER			:= 3.11.8
+PYTHON_VER			:= 3.12.2
 VENV				:= $(PYTHON_VER)-groupbychunkreader
 
 test_all:
