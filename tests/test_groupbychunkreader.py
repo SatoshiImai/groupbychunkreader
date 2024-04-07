@@ -525,7 +525,6 @@ def test_random_patterns(tempdir: Path, logger: Logger):
 def test_empty_df(tempdir: Path, logger: Logger):
     logger.info('empty_df')
 
-    key_size = random.randint(1, 100)
     source_record = []
 
     # generate
