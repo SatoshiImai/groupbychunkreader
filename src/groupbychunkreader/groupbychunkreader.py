@@ -2,7 +2,7 @@
 # ---------------------------------------------------------------------------
 # __author__ = 'Satoshi Imai'
 # __credits__ = ['Satoshi Imai']
-# __version__ = '0.9.0'
+# __version__ = '0.9.1'
 # ---------------------------------------------------------------------------
 
 import pandas as pd
@@ -32,6 +32,11 @@ class GroupByChunkReader:
                     this_df = pd.DataFrame([], columns=[self.group_by])
                     self.source_closed = True
                     # end try
+
+                if len(self.df_pool) == 0 and len(this_df) == 0:
+                    self.source_closed = True
+                    return this_df
+                    # end if
 
                 for split_key in list(this_df[self.group_by].unique()):
                     split_df = this_df.loc[
